@@ -6,8 +6,10 @@ DESKTOP_DIR="$HOME/Desktop"
 APP_DIR="$PREFIX/.local/share/Overclock-Manager"
 ZIP_URL="https://github.com/Taskerer/Overclock-Manager/releases/latest/download/Overclock-Manager.zip"
 
+# Clearing previous files
 cd "$PREFIX" || exit 1
 rm -rf "$APP_DIR" "$HOME/Overclock-Manager.zip"
+rm -f "$DESKTOP_DIR/Overclock-Manager.desktop"
 
 # Downloading and unpacking
 wget "$ZIP_URL" -O Overclock-Manager.zip || {
@@ -26,10 +28,9 @@ cat <<EOF >"$DESKTOP_DIR/Overclock-Manager.desktop"
 [Desktop Entry]
 Categories=Settings
 Comment=Overclock Manager For Steam Deck by SDWEAK
-Exec=./Overclock-Manager.sh
+Exec=bash -c 'cd $APP_DIR; ./Overclock-Manager.sh'
 Icon=flatpak-discover
 Name=Overclock Manager
-Path=$APP_DIR
 StartupNotify=false
 Terminal=true
 Type=Application
