@@ -38,7 +38,7 @@ logo "
 ||██║ ╚═╝ ██║██║  ██║██║ ╚████║██║  ██║╚██████╔╝███████╗██║  ██║             ||
 ||╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝  by SDWEAK  ||
 >>===========================================================================<<
-VERSION: X.X
+VERSION: 1.0
 DEVELOPER: @biddbb
 TG GROUP: @steamdeckoverclock
 "
@@ -82,6 +82,7 @@ block_bios_updates() {
 }
 
 # --- Main ---
+echo -e "$password" | sudo -S steamos-readonly disable
 while true
 do
 Choice=$(zenity --width 780 --height 429 --list --radiolist \
