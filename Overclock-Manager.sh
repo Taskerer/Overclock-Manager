@@ -82,7 +82,7 @@ block_bios_updates() {
 }
 
 # --- Main ---
-echo -e "$password" | sudo -S steamos-readonly disable
+echo -e "$password" | sudo -S steamos-readonly disable &>/dev/null
 while true
 do
 Choice=$(zenity --width 780 --height 429 --list --radiolist \
