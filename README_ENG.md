@@ -14,7 +14,7 @@
    ```
 
 4. Download the [installation shortcut](https://raw.githubusercontent.com/Taskerer/Overclock-Manager/refs/heads/main/OC-Manager-installer.desktop):  
-   Right-click on the link → **Save As...** and save to your desktop.  
+   Right-click on the link → **Save As...** and save to your desktop (if using Firefox, remove the .download at the end of the file).  
    Then double click the file and the installation will begin.
 
 5. After installation, launch the `Overclock Manager` shortcut from the desktop.
