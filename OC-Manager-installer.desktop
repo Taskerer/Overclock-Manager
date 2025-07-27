@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Install Overclock Manager
+Exec=curl https://raw.githubusercontent.com/Taskerer/Overclock-Manager/main/desktop-install.sh | bash -s --
+Icon=steamdeck-gaming-return
+Terminal=true
+Type=Application
+StartupNotify=false

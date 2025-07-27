@@ -1,0 +1,224 @@
+Limits(
+    cpu: Limit(
+        provider: GabeBoy,
+        limits: GenericCpusLimit(
+            cpus: [GenericCpuLimit(
+                clock_min: Some(RangeLimit(
+                    min: Some(1400),
+                    max: Some(3500),
+                )),
+                clock_max: Some(RangeLimit(
+                    min: Some(400),
+                    max: Some(3500),
+                )),
+                clock_step: Some(100),
+                tdp: None,
+                tdp_boost: None,
+                tdp_divisor: None,
+                tdp_step: None,
+                skip_resume_reclock: false,
+                extras: LimitExtras(
+                    experiments: false,
+                    quirks: [],
+),
+            ), GenericCpuLimit(
+                clock_min: Some(RangeLimit(
+                    min: Some(1400),
+                    max: Some(3500),
+                )),
+                clock_max: Some(RangeLimit(
+                    min: Some(400),
+                    max: Some(3500),
+                )),
+                clock_step: Some(100),
+                tdp: None,
+                tdp_boost: None,
+                tdp_divisor: None,
+                tdp_step: None,
+                skip_resume_reclock: false,
+                extras: LimitExtras(
+                    experiments: false,
+                    quirks: [],
+),
+            ), GenericCpuLimit(
+                clock_min: Some(RangeLimit(
+                    min: Some(1400),
+                    max: Some(3500),
+                )),
+                clock_max: Some(RangeLimit(
+                    min: Some(400),
+                    max: Some(3500),
+                )),
+                clock_step: Some(100),
+                tdp: None,
+                tdp_boost: None,
+                tdp_divisor: None,
+                tdp_step: None,
+                skip_resume_reclock: false,
+                extras: LimitExtras(
+                    experiments: false,
+                    quirks: [],
+),
+            ), GenericCpuLimit(
+                clock_min: Some(RangeLimit(
+                    min: Some(1400),
+                    max: Some(3500),
+                )),
+                clock_max: Some(RangeLimit(
+                    min: Some(400),
+                    max: Some(3500),
+                )),
+                clock_step: Some(100),
+                tdp: None,
+                tdp_boost: None,
+                tdp_divisor: None,
+                tdp_step: None,
+                skip_resume_reclock: false,
+                extras: LimitExtras(
+                    experiments: false,
+                    quirks: [],
+),
+            ), GenericCpuLimit(
+                clock_min: Some(RangeLimit(
+                    min: Some(1400),
+                    max: Some(3500),
+                )),
+                clock_max: Some(RangeLimit(
+                    min: Some(400),
+                    max: Some(3500),
+                )),
+                clock_step: Some(100),
+                tdp: None,
+                tdp_boost: None,
+                tdp_divisor: None,
+                tdp_step: None,
+                skip_resume_reclock: false,
+                extras: LimitExtras(
+                    experiments: false,
+                    quirks: [],
+),
+            ), GenericCpuLimit(
+                clock_min: Some(RangeLimit(
+                    min: Some(1400),
+                    max: Some(3500),
+                )),
+                clock_max: Some(RangeLimit(
+                    min: Some(400),
+                    max: Some(3500),
+                )),
+                clock_step: Some(100),
+                tdp: None,
+                tdp_boost: None,
+                tdp_divisor: None,
+                tdp_step: None,
+                skip_resume_reclock: false,
+                extras: LimitExtras(
+                    experiments: false,
+                    quirks: [],
+),
+            ), GenericCpuLimit(
+                clock_min: Some(RangeLimit(
+                    min: Some(1400),
+                    max: Some(3500),
+                )),
+                clock_max: Some(RangeLimit(
+                    min: Some(400),
+                    max: Some(3500),
+                )),
+                clock_step: Some(100),
+                tdp: None,
+                tdp_boost: None,
+                tdp_divisor: None,
+                tdp_step: None,
+                skip_resume_reclock: false,
+                extras: LimitExtras(
+                    experiments: false,
+                    quirks: [],
+),
+            ), GenericCpuLimit(
+                clock_min: Some(RangeLimit(
+                    min: Some(1400),
+                    max: Some(3500),
+                )),
+                clock_max: Some(RangeLimit(
+                    min: Some(400),
+                    max: Some(3500),
+                )),
+                clock_step: Some(100),
+                tdp: None,
+                tdp_boost: None,
+                tdp_divisor: None,
+                tdp_step: None,
+                skip_resume_reclock: false,
+                extras: LimitExtras(
+                    experiments: false,
+                    quirks: [],
+),
+            )],
+            global_governors: true,
+            extras: LimitExtras(
+                experiments: false,
+                quirks: [],
+),
+        ),
+    ),
+    gpu: Limit(
+        provider: GabeBoy,
+        limits: GenericGpuLimit(
+            fast_ppt: Some(RangeLimit(
+                min: Some(1000000),
+                max: Some(30000000),
+            )),
+            fast_ppt_default: Some(15000000),
+            slow_ppt: Some(RangeLimit(
+                min: Some(1000000),
+                max: Some(29000000),
+            )),
+            slow_ppt_default: Some(15000000),
+            ppt_divisor: Some(1000000),
+            ppt_step: Some(1),
+            tdp: None,
+            tdp_boost: None,
+            tdp_divisor: None,
+            tdp_step: None,
+            clock_min: Some(RangeLimit(
+                min: Some(400),
+                max: Some(#freq),
+            )),
+            clock_max: Some(RangeLimit(
+                min: Some(400),
+                max: Some(#freq),
+            )),
+            clock_step: Some(100),
+            memory_clock: Some(RangeLimit(
+                min: Some(400),
+                max: Some(800),
+            )),
+            memory_clock_step: Some(400),
+            skip_resume_reclock: false,
+            extras: LimitExtras(
+                experiments: false,
+                quirks: ["pp_dpm_fclk-reversed", "pp_dpm_fclk-not-updated-on-LCD"],
+            ),
+        ),
+    ),
+    battery: Limit(
+        provider: GabeBoy,
+        limits: GenericBatteryLimit(
+            charge_rate: Some(RangeLimit(
+                min: Some(250),
+                max: Some(2500),
+            )),
+            charge_modes: ["normal", "discharge", "idle"],
+            charge_limit: Some(RangeLimit(
+                min: Some(10.0),
+                max: Some(90.0),
+            )),
+            extra_readouts: false,
+            extras: LimitExtras(
+                experiments: false,
+                quirks: [],
+),
+        ),
+    ),
+)
