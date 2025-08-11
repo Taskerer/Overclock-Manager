@@ -87,7 +87,7 @@ Additional tips to enhance Steam Deck performance:
 ## Feedback
 
 - Create an **issue** describing your problem
-- Message me on Telegram: **@biddbb**
+- Message me on Telegram: **@noncatt**
 - Or write in our [Telegram group](https://t.me/steamdeckoverclock) — we're happy to help!
 
 ## Contributing

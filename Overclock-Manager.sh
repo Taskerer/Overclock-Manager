@@ -39,7 +39,7 @@ logo "
 ||╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝  by SDWEAK  ||
 >>===========================================================================<<
 VERSION: 1.0
-DEVELOPER: @biddbb
+DEVELOPER: @noncatt
 TG GROUP: @steamdeckoverclock
 "
 sleep 1.5
