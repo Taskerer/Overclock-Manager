@@ -32,7 +32,7 @@ Exec=bash -c 'cd $APP_DIR; ./Overclock-Manager.sh'
 Icon=flatpak-discover
 Name=Overclock Manager
 StartupNotify=false
-Terminal=true
+Terminal=false
 Type=Application
 Version=2.0
 EOF
