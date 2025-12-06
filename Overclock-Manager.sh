@@ -1,49 +1,5 @@
 #!/bin/bash
 
-clear
-# Colorized output
-green_msg() {
-    tput setaf 14
-    echo "[*] --- $1"
-    tput sgr0
-}
-red_msg() {
-    tput setaf 3
-    echo "[*] --- $1"
-    tput sgr0
-}
-err_msg() {
-    tput setaf 1
-    echo "[!] --- $1"
-    tput sgr0
-}
-logo() {
-    tput setaf 11
-    echo "$1"
-    tput sgr0
-}
-logo "
->>===========================================================================<<
-|| ██████╗ ██╗   ██╗███████╗██████╗  ██████╗██╗      ██████╗  ██████╗██╗  ██╗||
-||██╔═══██╗██║   ██║██╔════╝██╔══██╗██╔════╝██║     ██╔═══██╗██╔════╝██║ ██╔╝||
-||██║   ██║██║   ██║█████╗  ██████╔╝██║     ██║     ██║   ██║██║     █████╔╝ ||
-||██║   ██║╚██╗ ██╔╝██╔══╝  ██╔══██╗██║     ██║     ██║   ██║██║     ██╔═██╗ ||
-||╚██████╔╝ ╚████╔╝ ███████╗██║  ██║╚██████╗███████╗╚██████╔╝╚██████╗██║  ██╗||
-|| ╚═════╝   ╚═══╝  ╚══════╝╚═╝  ╚═╝ ╚═════╝╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝||
-||                                                                           ||
-||███╗   ███╗ █████╗ ███╗   ██╗ █████╗  ██████╗ ███████╗██████╗              ||
-||████╗ ████║██╔══██╗████╗  ██║██╔══██╗██╔════╝ ██╔════╝██╔══██╗             ||
-||██╔████╔██║███████║██╔██╗ ██║███████║██║  ███╗█████╗  ██████╔╝             ||
-||██║╚██╔╝██║██╔══██║██║╚██╗██║██╔══██║██║   ██║██╔══╝  ██╔══██╗             ||
-||██║ ╚═╝ ██║██║  ██║██║ ╚████║██║  ██║╚██████╔╝███████╗██║  ██║             ||
-||╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝  by SDWEAK  ||
->>===========================================================================<<
-VERSION: 1.0
-DEVELOPER: @noncatt
-TG GROUP: @steamdeckoverclock
-"
-sleep 1.5
-
 # Entering and verifying sudo password
 status=$(passwd --status $USER | awk '{print $2}')
 if [ "$status" == "P" ]; then
@@ -102,24 +58,38 @@ Choice=$(zenity --width 780 --height 429 --list --radiolist \
 	FALSE "Unblock BIOS Update" "Allow SteamOS to automatically install BIOS updates."\
 	TRUE EXIT "Exit this script.")
 
-if [ $? -eq 1 ] || [ "$Choice" == "EXIT" ]
-then
-	red_msg "Goodbye!"
+if [ $? -eq 1 ] || [ "$Choice" == "EXIT" ]; then
 	rm -f ./BIOS/F*.fd &>/dev/null
 	exit
 
-elif [ "$Choice" == "Backup BIOS" ]
-then
+elif [ "$Choice" == "Backup BIOS" ]; then
 	clear
-	mkdir ~/BIOS_BACKUP &>/dev/null
-	echo -e "$password" | sudo -S /usr/share/jupiter_bios_updater/h2offt \
-		~/BIOS_BACKUP/jupiter-$BIOS_VERSION-bios-backup-$(date +%Y-%m-%d_%H-%M-%S).bin -O
-	zenity --info --title "Overclock Manager" --text "BIOS backup successfully completed! \
-		\n\nBackup is saved in BIOS_BACKUP folder in the home directory." --width 400 --height 75
+	BACKUP_DIR="$HOME/BIOS_BACKUP"
+	mkdir -p "$BACKUP_DIR"
+	BACKUP_FILENAME="$BACKUP_DIR/jupiter-$BIOS_VERSION-bios-backup-$(date +%Y-%m-%d_%H-%M-%S).bin"
+	(echo -e "$password" | sudo -S /usr/share/jupiter_bios_updater/h2offt "$BACKUP_FILENAME" -O) &> /dev/null &
+	BACKUP_PID=$!
+
+	while ps -p $BACKUP_PID > /dev/null; do
+    	sleep 0.5
+	done | zenity --progress \
+		--title="Backup in Progress" \
+		--text="Creating BIOS backup...\n\nPlease wait, this may take a moment." \
+		--pulsate \
+		--auto-close \
+		--width=400
+	wait $BACKUP_PID
+	EXIT_CODE=$?
+
+	if [ $EXIT_CODE -eq 0 ] && [ -f "$BACKUP_FILENAME" ]; then
+		zenity --info --title "Overclock Manager" --text "BIOS backup successfully completed! \
+			\n\nBackup is saved in:\n<b>$BACKUP_DIR</b>" --width 450 --height 100
+	else
+		zenity --error --title "Overclock Manager" --text "An error occurred during the BIOS backup process. The backup may have failed." --width 400
+	fi
 	clear
 
-elif [ "$Choice" == "SREP Configuration" ]
-then
+elif [ "$Choice" == "SREP Configuration" ]; then
 	clear
 	if [[ "$MODEL" = "Galileo" || ( "$MODEL" = "Jupiter" && ( "$BIOS_VERSION" = "F7A0131" || "$BIOS_VERSION" = "F7A0133" ) ) ]]; then
 		SREP_Choice=$(zenity --width 660 --height 250 --list --radiolist --multiple --title "Overclock Manager" \
@@ -129,17 +99,14 @@ then
 			FALSE "Delete SREP" "Delete SREP files from the ESP."\
 			TRUE "Main Menu" "Go back to Main Menu.")
 
-			if [ $? -eq 1 ] || [ "$SREP_Choice" == "Main Menu" ]
-			then
-			red_msg "Return to the main menu!"
+			if [ $? -eq 1 ] || [ "$SREP_Choice" == "Main Menu" ]; then
+				continue
 
-			elif [ "$SREP_Choice" == "Standard SREP" ]
-			then
+			elif [ "$SREP_Choice" == "Standard SREP" ]; then
 				echo -e "$password" | sudo -S rm -rf /esp/efi/$MODEL-SREP /esp/SREP.log /esp/SREP_Config.cfg
 				mkdir ./$MODEL-SREP
 				unzip -j -d ./$MODEL-SREP ./extras/SREP.zip
-				if [ $? -eq 0 ]
-				then
+				if [ $? -eq 0 ]; then
 					echo -e "$password" | sudo -S mv -f ./$MODEL-SREP/SREP_Config.cfg /esp &>/dev/null
 					echo -e "$password" | sudo -S cp -R ./$MODEL-SREP /esp/efi
 					rm -rf ./$MODEL-SREP
@@ -151,8 +118,7 @@ then
 						--width 350 --height 75
 				fi
 
-			elif [ "$SREP_Choice" == "Custom SREP" ]
-			then
+			elif [ "$SREP_Choice" == "Custom SREP" ]; then
 				echo -e "$password" | sudo -S rm -rf /esp/efi/$MODEL-SREP /esp/SREP.log /esp/SREP_Config.cfg
 				mkdir ./$MODEL-SREP
 				cp ./extras/RUNTIME-PATCHER.efi ./$MODEL-SREP
@@ -169,24 +135,23 @@ then
     				--add-entry="Value instead of -30 mV" \
     				--add-entry="Value instead of -40 mV" \
     				--add-entry="Value instead of -50 mV" > ./extras/uv.conf
-    			if [ $? -eq 1 ]
-    			then
-					red_msg "Return to the main menu!"
+    			if [ $? -eq 1 ]; then
+    				continue
     			else
     			process_undervolt() {
         			local undervolt_config_file="./extras/uv.conf"
         			local srep_config_file="./SREP_Config.cfg"
         			if [ ! -f "$undervolt_config_file" ]; then
-						err_msg "File '$undervolt_config_file' not found."
+						zenity --error --title "Overclock Manager" --text "File '$undervolt_config_file' not found."
 						return 1
 					fi
         			if [ ! -f "$srep_config_file" ]; then
-        				err_msg "File '$srep_config_file' not found."
+        				zenity --error --title "Overclock Manager" --text "File '$srep_config_file' not found."
         				return 1
     				fi
         			IFS=',' read -r -a undervolt_values < "$undervolt_config_file"
         			if [ "${#undervolt_values[@]}" -ne 5 ]; then
-            			err_msg "File '$undervolt_config_file' must contain exactly five numbers."
+            			zenity --error --title "Overclock Manager" --text "File '$undervolt_config_file' must contain exactly five numbers."
             			return 1
         			fi
         			local sed_cmds=()
@@ -215,7 +180,7 @@ then
             			zenity --info --title "Overclock Manager" --text "The custom undervolting configuration using SREP has been successfully applied." --width 350 --height 75
             			clear
         			else
-            			err_msg "Error when updating a file '$srep_config_file'."
+            			zenity --error --title "Overclock Manager" --text "Error when updating a file '$srep_config_file'."
             			return 1
         			fi
         			return 0
@@ -225,8 +190,7 @@ then
     			rm -f ./extras/uv.conf
     			fi
 
-			elif [ "$SREP_Choice" == "Delete SREP" ]
-			then
+			elif [ "$SREP_Choice" == "Delete SREP" ]; then
 				# Delete SREP files from ESP
 				echo -e "$password" | sudo -S rm -rf /esp/efi/$MODEL-SREP /esp/SREP.log /esp/SREP_Config.cfg
 				zenity --info --title "Overclock Manager" --text "SREP files were successfully deleted from ESP!" --width 350 --height 75
@@ -236,56 +200,55 @@ then
 			\n\nOnly BIOS versions 131 and 133 on Steam Deck LCD can be unlocked with SREP. Use Smokeless or flash the required BIOS verison." --width 400 --height 75
 	fi
 
-elif [ "$Choice" == "Download BIOS" ]
-then
+elif [ "$Choice" == "Download BIOS" ]; then
 	# Checking Internet access
-	if ping -c 1 8.8.8.8 &>/dev/null || ping -c 1 1.1.1.1 &>/dev/null || ping -c 1 208.67.222.222 &>/dev/null || ping -c 1 9.9.9.9 &>/dev/null || ping -c 1 94.140.14.14 &>/dev/null || ping -c 1 8.26.56.26 &>/dev/null; then
-    	green_msg "Internet connection established."
-	else
-    	err_msg "No Internet connection! Please connect to the Internet."
-    	exit 1
+	if ! ping -c 1 8.8.8.8 &>/dev/null || ! ping -c 1 1.1.1.1 &>/dev/null || ! ping -c 1 208.67.222.222 &>/dev/null || ! ping -c 1 9.9.9.9 &>/dev/null || ! ping -c 1 94.140.14.14 &>/dev/null || ! ping -c 1 8.26.56.26 &>/dev/null; then
+    	zenity --error --title "Overclock Manager" --text "No Internet connection!\nPlease connect to the Internet and try again."
+    	continue
 	fi
     # Preparation
 	clear
 	mkdir -p ./BIOS &>/dev/null
 	rm -f ./BIOS/F*.fd &>/dev/null
-	# Downloading
-	if [ $MODEL = "Jupiter" ]
-	then
-		red_msg "Downloading BIOS files for Steam Deck LCD. Please wait."
-		red_msg "Downloading BIOS F7A0110"
-		curl -s -O --output-dir ./BIOS/ -L \
-			https://gitlab.com/evlaV/jupiter-hw-support/-/raw/0660b2a5a9df3bd97751fe79c55859e3b77aec7d/usr/share/jupiter_bios/F7A0110_sign.fd
-		red_msg "Downloading BIOS F7A0116"
-		curl -s -O --output-dir ./BIOS/ -L \
-			https://gitlab.com/evlaV/jupiter-hw-support/-/raw/38f7bdc2676421ee11104926609b4cc7a4dbc6a3/usr/share/jupiter_bios/F7A0116_sign.fd
-		red_msg "Downloading BIOS F7A0131"
-		curl -s -O --output-dir ./BIOS/ -L \
-			https://gitlab.com/evlaV/jupiter-hw-support/-/raw/eb91bebf4c2e5229db071720250d80286368e4e2/usr/share/jupiter_bios/F7A0131_sign.fd
-		red_msg "Downloading BIOS F7A0133"
-		curl -s -O --output-dir ./BIOS/ -L \
-			https://gitlab.com/evlaV/jupiter-hw-support/-/raw/5c14655a762870754f9d8574682b6727cb640904/usr/share/jupiter_bios/F7A0133_sign.fd
-		green_msg "Downloading BIOS files for Steam Deck LCD has been successfully completed."
-	
-	elif [ $MODEL = "Galileo" ]
-	then
-		red_msg "Downloading BIOS files for Steam Deck OLED. Please wait."
-		red_msg "Downloading BIOS F7G0112"
-		curl -s -O --output-dir ./BIOS/ -L \
-			https://gitlab.com/evlaV/jupiter-hw-support/-/raw/6101a30a621a2119e8c5213e872b268973659964/usr/share/jupiter_bios/F7G0112_sign.fd
-		red_msg "Downloading BIOS F7G0110"
-		curl -s -O --output-dir ./BIOS/ -L \
-			https://gitlab.com/evlaV/jupiter-hw-support/-/raw/eb91bebf4c2e5229db071720250d80286368e4e2/usr/share/jupiter_bios/F7G0110_sign.fd
-		red_msg "Downloading BIOS F7G0109"
-		curl -s -O --output-dir ./BIOS/ -L \
-			https://gitlab.com/evlaV/jupiter-hw-support/-/raw/7ffc22a4dc083c005e26676d276bdbd90dd1de5e/usr/share/jupiter_bios/F7G0109_sign.fd
-		red_msg "Downloading BIOS F7G0107"
-		curl -s -O --output-dir ./BIOS/ -L \
-			https://gitlab.com/evlaV/jupiter-hw-support/-/raw/a43e38819ba20f363bdb5bedcf3f15b75bf79323/usr/share/jupiter_bios/F7G0107_sign.fd
-		green_msg "Downloading BIOS files for Steam Deck OLED has been successfully completed."
+	declare -a files_to_download
+	if [ "$MODEL" = "Jupiter" ]; then
+		files_to_download=(
+			"https://gitlab.com/evlaV/jupiter-hw-support/-/raw/0660b2a5a9df3bd97751fe79c55859e3b77aec7d/usr/share/jupiter_bios/F7A0110_sign.fd"
+			"https://gitlab.com/evlaV/jupiter-hw-support/-/raw/38f7bdc2676421ee11104926609b4cc7a4dbc6a3/usr/share/jupiter_bios/F7A0116_sign.fd"
+			"https://gitlab.com/evlaV/jupiter-hw-support/-/raw/eb91bebf4c2e5229db071720250d80286368e4e2/usr/share/jupiter_bios/F7A0131_sign.fd"
+			"https://gitlab.com/evlaV/jupiter-hw-support/-/raw/5c14655a762870754f9d8574682b6727cb640904/usr/share/jupiter_bios/F7A0133_sign.fd"
+		)
+		device_name="Steam Deck LCD"
+	elif [ "$MODEL" = "Galileo" ]; then
+		files_to_download=(
+			"https://gitlab.com/evlaV/jupiter-hw-support/-/raw/6101a30a621a2119e8c5213e872b268973659964/usr/share/jupiter_bios/F7G0112_sign.fd"
+			"https://gitlab.com/evlaV/jupiter-hw-support/-/raw/eb91bebf4c2e5229db071720250d80286368e4e2/usr/share/jupiter_bios/F7G0110_sign.fd"
+			"https://gitlab.com/evlaV/jupiter-hw-support/-/raw/7ffc22a4dc083c005e26676d276bdbd90dd1de5e/usr/share/jupiter_bios/F7G0109_sign.fd"
+			"https://gitlab.com/evlaV/jupiter-hw-support/-/raw/a43e38819ba20f363bdb5bedcf3f15b75bf79323/usr/share/jupiter_bios/F7G0107_sign.fd"
+		)
+		device_name="Steam Deck OLED"
 	fi
 
-	# Array with MD5 hashes for BIOS files
+	# Downloading
+	(
+	file_count=${#files_to_download[@]}
+	progress_step=$((100 / file_count))
+	current_progress=0
+	for url in "${files_to_download[@]}"; do
+		filename=$(basename "$url")
+		echo "# Downloading $filename for $device_name..."
+		curl -s -L "$url" -o "./BIOS/$filename"
+		current_progress=$((current_progress + progress_step))
+		echo "$current_progress"
+	done
+	) | zenity --progress --title="Downloading BIOS" --text="Starting download..." --percentage=0 --auto-close --width=400
+
+	if [ $? -eq 1 ]; then
+		zenity --warning --title="Overclock Manager" --text="Download cancelled by user."
+		continue
+	fi
+
+	# Checking hashes
 	declare -A valid_hashes=(
 		["F7A0110_sign.fd"]="098e1422362f4d69b32a3c073ed7cb1a"
 		["F7A0116_sign.fd"]="fb57221367ba12913383ad07eeaf52ae"
@@ -296,89 +259,106 @@ then
 		["F7G0110_sign.fd"]="336138b19d27526acd4642ffe53aee34"
 		["F7G0112_sign.fd"]="44f0243f662c6d279eb55cdb89089f7f"
 	)
-	# Checking MD5 hashes of downloaded BIOS files
+	report_text="Download and Verification Report:\n\n"
+	error_found=false
+
 	if ! ls ./BIOS/*.fd &>/dev/null; then
-		err_msg "No BIOS files were found in the ./BIOS/ directory."
-		err_msg "Perform the Download BIOS operation again!"
+		zenity --error --title "Overclock Manager" --text "No BIOS files were downloaded. Please check your connection and try again."
+		continue
 	fi
+
 	for BIOS_FD in ./BIOS/*.fd; do
 		filename=$(basename "$BIOS_FD")
 		if [ -z "${valid_hashes[$filename]}" ]; then
-    		err_msg "$BIOS_FD: file not found in the valid hash list."
-    	continue
+			report_text+="$filename: ❌ Unknown file (not in hash list).\n"
+			error_found=true
+			continue
 		fi
 		file_hash=$(md5sum "$BIOS_FD" | cut -d " " -f 1)
 		if [ "$file_hash" == "${valid_hashes[$filename]}" ]; then
-    		green_msg "$BIOS_FD: MD5 hash is good!"
+			report_text+="$filename: ✅ MD5 hash OK.\n"
 		else
-    		err_msg "$BIOS_FD: MD5 hash validation error!"
-    		err_msg "Perform the Download BIOS operation again!"
-    		rm "$BIOS_FD"
+			report_text+="$filename: ❌ MD5 hash MISMATCH!\n"
+			error_found=true
+			rm "$BIOS_FD"
 		fi
 	done
 
-elif [ "$Choice" == "Flash BIOS" ]
-then
-	clear
-	ls ./BIOS/F7?????_sign.fd &>/dev/null
-	if [ $? -eq 0 ]
-	then
-		BIOS_Choice=$(zenity --title "Overclock Manager" --width 400 --height 400 --list \
-			--column "BIOS Version" $(ls -l ./BIOS/F7?????_sign.fd | sed s/^.*\\/\//) )
-		if [ $? -eq 1 ]
-		then
-			red_msg "Return to the main menu!"
-		else
-			zenity --question --title "Overclock Manager" --text \
-			"Do you want to backup the current BIOS before updating to $BIOS_Choice?\n\nProceed?" --width 400 --height 75
-			if [ $? -eq 1 ]
-			then
-				zenity --question --title "Overclock Manager" --text \
-					"Current BIOS will be updated to $BIOS_Choice!\n\nProceed?" --width 400 --height 75
-				if [ $? -eq 1 ]
-				then
-					red_msg "Return to the main menu!"
-				else
-					red_msg "BIOS flashing starts."
-					# Blocking automatic BIOS update.
-					block_bios_updates
-					# BIOS flashing
-					echo -e "$password" | sudo -S /usr/share/jupiter_bios_updater/h2offt ./BIOS/$BIOS_Choice -all
-				fi
-			else
-				red_msg "Perform BIOS backup and then flash $BIOS_Choice!"
-				# Blocking automatic BIOS update.
-				block_bios_updates
-				# Backup the BIOS and flash the BIOS
-				mkdir ~/BIOS_BACKUP &>/dev/null
-				echo -e "$password" | sudo -S /usr/share/jupiter_bios_updater/h2offt \
-					~/BIOS_BACKUP/jupiter-$BIOS_VERSION-bios-backup-$(date +%Y-%m-%d_%H-%M-%S).bin -O
-				echo -e "$password" | sudo -S /usr/share/jupiter_bios_updater/h2offt ./BIOS/$BIOS_Choice -all
-			fi
-		fi
+	if [ "$error_found" = true ]; then
+		zenity --error --title "Verification Failed" --text="$report_text\nSome files failed verification and were deleted. Please try downloading again."
 	else
-		zenity --error --title "Overclock Manager" --text \
-			"BIOS files not found.\n\nPerform a Download BIOS operation first." --width 400 --height 75
+		zenity --info --title "Success" --text="$report_text\nAll files downloaded and verified successfully."
 	fi
 
-elif [ "$Choice" == "TDP Value" ]
-then
+elif [ "$Choice" == "Flash BIOS" ]; then
+	clear
+	if ! ls ./BIOS/F7?????_sign.fd &>/dev/null; then
+		zenity --error --title "Overclock Manager" --text \
+			"BIOS files not found.\n\nPlease perform the 'Download BIOS' operation first." --width 400 --height 75
+		continue
+	fi
+
+	BIOS_Choice=$(zenity --title "Overclock Manager" --width 400 --height 400 --list \
+		--column "BIOS Version" $(ls -l ./BIOS/F7?????_sign.fd | sed 's/^.*\\/\//') )
+
+	if [ $? -eq 1 ]; then
+		continue
+	fi
+
+	zenity --question --title "Overclock Manager" --text \
+	"Do you want to backup the current BIOS before updating to $BIOS_Choice?\n\n(Recommended)" --width 400 --height 75
+
+	BACKUP_REQUESTED=$?
+
+	if [ $BACKUP_REQUESTED -eq 0 ]; then
+		(echo -e "$password" | sudo -S /usr/share/jupiter_bios_updater/h2offt "$BACKUP_FILENAME" -O) &> /dev/null &
+		BACKUP_PID=$!
+
+		while ps -p $BACKUP_PID > /dev/null; do
+    		sleep 0.5
+		done | zenity --progress \
+			--title="Backup in Progress (Step 1 of 2)" \
+			--text="Creating BIOS backup...\n\nPlease wait." \
+			--pulsate --auto-close --width=400
+
+		wait $BACKUP_PID
+		EXIT_CODE=$?
+		if [ $EXIT_CODE -eq 0 ] && [ -f "$BACKUP_FILENAME" ]; then
+			zenity --info --title="Step 2: Flashing" --text="Backup successful!\n\nNow proceeding to flash <b>$BIOS_Choice</b>.\n\nThe device will restart automatically. DO NOT turn it off." --width=400
+			block_bios_updates
+			echo -e "$password" | sudo -S /usr/share/jupiter_bios_updater/h2offt ./BIOS/$BIOS_Choice -all
+		else
+			zenity --error --title="Backup Failed" --text="The BIOS backup failed. The flashing process has been ABORTED to ensure safety.\n\nPlease try again." --width=400
+			continue
+		fi
+	else
+		zenity --question --title "Overclock Manager" --text \
+			"You chose not to create a backup.\nCurrent BIOS will be updated to <b>$BIOS_Choice</b>!\n\nThis is a critical operation. DO NOT turn off your Steam Deck.\n\nProceed?" --width 400 --height 90
+		if [ $? -eq 0 ]; then
+			zenity --info --title="Flashing BIOS" --text="BIOS flashing will now begin for $BIOS_Choice.\n\nThe device will restart automatically upon completion.\n\nDO NOT turn off the device." --width=400
+			block_bios_updates
+			echo -e "$password" | sudo -S /usr/share/jupiter_bios_updater/h2offt ./BIOS/$BIOS_Choice -all
+		else
+			continue
+		fi
+	fi
+
+elif [ "$Choice" == "TDP Value" ]; then
 	clear
 	zenity --forms \
 		--title="Overclock Manager" \
     	--text="Enter the desired TDP value." \
     	--separator="," \
     	--add-entry="TDP value (in watts)" > ./extras/tdp.conf
-	if [ $? -eq 1 ]
-    then
-		red_msg "Return to the main menu!"
+	if [ $? -eq 1 ]; then
+		continue
     else
 		file1="/usr/share/steamos-manager/devices/jupiter.toml"
 		file2="/usr/share/steamos-manager/platforms/jupiter.toml"
 		if [ -f "$file1" ]; then
 			CONFIG_FILE="./extras/tdp.conf"
 			if [ ! -f "$CONFIG_FILE" ]; then
-    			err_msg "File '$CONFIG_FILE' not found."
+    			zenity --error --title "Overclock Manager" --text "File '$CONFIG_FILE' not found."
     			exit 1
 			fi
 			value=$(cat "$CONFIG_FILE")
@@ -405,7 +385,7 @@ then
 		elif [ -f "$file2" ]; then
 			CONFIG_FILE="./extras/tdp.conf"
 			if [ ! -f "$CONFIG_FILE" ]; then
-    			err_msg "File '$CONFIG_FILE' not found."
+    			zenity --error --title "Overclock Manager" --text "File '$CONFIG_FILE' not found."
     			exit 1
 			fi
 			value=$(cat "$CONFIG_FILE")
@@ -435,19 +415,15 @@ then
 		fi
     fi
 
-
-
-elif [ "$Choice" == "GPU Clock" ]
-then
+elif [ "$Choice" == "GPU Clock" ]; then
 	clear
 	zenity --forms \
 		--title="Overclock Manager" \
     	--text="Enter the desired GPU frequency." \
     	--separator="," \
     	--add-entry="GPU frequency (in MHz)" > ./extras/gpu.conf
-	if [ $? -eq 1 ]
-    then
-		red_msg "Return to the main menu!"
+	if [ $? -eq 1 ]; then
+		continue
     else
     	file1="/usr/share/steamos-manager/devices/jupiter.toml"
 		file2="/usr/share/steamos-manager/platforms/jupiter.toml"
@@ -460,7 +436,7 @@ then
 		if [ -f "$file3" ]; then
 			CONFIG_FILE="./extras/gpu.conf"
 			if [ ! -f "$CONFIG_FILE" ]; then
-    			err_msg "File '$CONFIG_FILE' not found."
+    			zenity --error --title "Overclock Manager" --text "File '$CONFIG_FILE' not found."
     			exit 1
 			fi
 			value=$(cat "$CONFIG_FILE")
@@ -490,8 +466,7 @@ then
 		fi
     fi
 
-elif [ "$Choice" == "Power Tools" ]
-then
+elif [ "$Choice" == "Power Tools" ]; then
 	clear
 	if [ -f /home/deck/homebrew/plugins/PowerTools/main.py ]; then
 		zenity --forms \
@@ -499,9 +474,8 @@ then
     	--text="Enter the desired GPU frequency." \
     	--separator="," \
     	--add-entry="GPU frequency (in MHz)" > ./extras/pt.conf
-		if [ $? -eq 1 ]
-    	then
-			red_msg "Return to the main menu!"
+		if [ $? -eq 1 ]; then
+			continue
     	else
     		cp -f ./extras/limits_override.ron ./limits_override.ron
     		value=$(cat ./extras/pt.conf)
@@ -522,16 +496,13 @@ then
 		"Power Tools plugin is not installed" --width 400 --height 75
 	fi
 
-elif [ "$Choice" == "Smokeless Unlock" ]
-then
+elif [ "$Choice" == "Smokeless Unlock" ]; then
 	clear
-	if [ "$MODEL" == "Galileo" ]
-	then
+	if [ "$MODEL" == "Galileo" ]; then
 		zenity --error --title "Overclock Manager" --text "Steam Deck OLED can\'t be unlocked using Smokeless." --width 400 --height 75
 	else
 		if [ "$BIOS_VERSION" == "F7A0110" ] || [ "$BIOS_VERSION" == "F7A0113" ] || \
-			[ "$BIOS_VERSION" == "F7A0115" ] || [ "$BIOS_VERSION" == "F7A0116" ]
-		then
+			[ "$BIOS_VERSION" == "F7A0115" ] || [ "$BIOS_VERSION" == "F7A0116" ]; then
 			chmod +x ./extras/jupiter-bios-unlock
 			echo -e "$password" | sudo -S ./extras/jupiter-bios-unlock
 			zenity --info --title "Overclock Manager" --text "BIOS successfully unlocked with Smokeless. \
@@ -542,15 +513,13 @@ then
 		fi
 	fi
 
-elif [ "$Choice" == "Block BIOS Update" ]
-then
+elif [ "$Choice" == "Block BIOS Update" ]; then
 	clear
 	# Blocking automatic BIOS update.
 	block_bios_updates
 	zenity --info --title "Overclock Manager" --text "Automatic BIOS update has been successfully blocked!" --width 400 --height 75
 
-elif [ "$Choice" == "Unblock BIOS Update" ]
-then
+elif [ "$Choice" == "Unblock BIOS Update" ]; then
 	clear
 	echo -e "$password" | sudo -S steamos-readonly disable
 	echo -e "$password" | sudo -S systemctl unmask jupiter-biosupdate

@@ -34,7 +34,7 @@ Name=Overclock Manager
 StartupNotify=false
 Terminal=true
 Type=Application
-Version=1.0
+Version=2.0
 EOF
 chmod +x "$DESKTOP_DIR/Overclock-Manager.desktop"
 
