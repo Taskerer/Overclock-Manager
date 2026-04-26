@@ -354,7 +354,7 @@ elif [ "$Choice" == "TDP Value" ]; then
 		continue
     else
 		file1="/usr/share/steamos-manager/devices/jupiter.toml"
-		file2="/usr/share/steamos-manager/platforms/jupiter.toml"
+		file2="/usr/share/steamos-manager/devices/steam-deck.toml"
 		if [ -f "$file1" ]; then
 			CONFIG_FILE="./extras/tdp.conf"
 			if [ ! -f "$CONFIG_FILE" ]; then
@@ -419,52 +419,55 @@ elif [ "$Choice" == "GPU Clock" ]; then
 	clear
 	zenity --forms \
 		--title="Overclock Manager" \
-    	--text="Enter the desired GPU frequency." \
-    	--separator="," \
-    	--add-entry="GPU frequency (in MHz)" > ./extras/gpu.conf
+		--text="Enter the desired GPU frequency." \
+		--separator="," \
+		--add-entry="GPU frequency (in MHz)" > ./extras/gpu.conf
 	if [ $? -eq 1 ]; then
 		continue
-    else
-    	file1="/usr/share/steamos-manager/devices/jupiter.toml"
-		file2="/usr/share/steamos-manager/platforms/jupiter.toml"
+	else
+		file1="/usr/share/steamos-manager/devices/jupiter.toml"
+		file2="/usr/share/steamos-manager/devices/steam-deck.toml"
 		file3=""
+		gpu_clocks_section=""
 		if [ -f "$file1" ]; then
 			file3="$file1"
+			gpu_clocks_section="gpu_clocks"
 		elif [ -f "$file2" ]; then
 			file3="$file2"
+			gpu_clocks_section="gpu_performance.clocks"
 		fi
 		if [ -f "$file3" ]; then
 			CONFIG_FILE="./extras/gpu.conf"
 			if [ ! -f "$CONFIG_FILE" ]; then
-    			zenity --error --title "Overclock Manager" --text "File '$CONFIG_FILE' not found."
-    			exit 1
+				zenity --error --title "Overclock Manager" --text "File '$CONFIG_FILE' not found."
+				exit 1
 			fi
 			value=$(cat "$CONFIG_FILE")
 			if ! [[ "$value" =~ ^[0-9]+$ ]] || [ "$value" -lt 200 ] || [ "$value" -gt 2400 ]; then
-    			zenity --error --title "Overclock Manager" --text ""$value" is incorrect. \
+				zenity --error --title "Overclock Manager" --text ""$value" is incorrect. \
 				\nIt should be between 200 and 2300." --width 400 --height 75
-    			exit 1
+				exit 1
 			fi
 			echo -e "$password" | sudo -S sed -i.bak '
-			/\[gpu_clocks]/ {
-    			n
-    			n
-    			s/max = [0-9]\+/max = '"$value"'/
+			/\['"$gpu_clocks_section"']/ {
+				n
+				n
+				s/max = [0-9]\+/max = '"$value"'/
 			}
 			' "$file3"
 			if [ $? -eq 0 ]; then
-    			zenity --info --title "Overclock Manager" --text "GPU frequency of "$value"MHz has been successfully set." --width 350 --height 75
-    			rm -f ./extras/gpu.conf
+				zenity --info --title "Overclock Manager" --text "GPU frequency of "$value"MHz has been successfully set." --width 350 --height 75
+				rm -f ./extras/gpu.conf
 			else
-    			zenity --error --title "Overclock Manager" --text "Error when trying to set GPU frequency." \
-						--width 350 --height 75
-    			exit 1
+				zenity --error --title "Overclock Manager" --text "Error when trying to set GPU frequency." \
+					--width 350 --height 75
+				exit 1
 			fi
 		else
 			zenity --error --title "Overclock Manager" --text \
 			""$file3" was not found.\nThe system may be corrupted." --width 400 --height 75
 		fi
-    fi
+	fi
 
 elif [ "$Choice" == "Power Tools" ]; then
 	clear
