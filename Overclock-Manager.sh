@@ -347,73 +347,52 @@ elif [ "$Choice" == "TDP Value" ]; then
 	clear
 	zenity --forms \
 		--title="Overclock Manager" \
-    	--text="Enter the desired TDP value." \
-    	--separator="," \
-    	--add-entry="TDP value (in watts)" > ./extras/tdp.conf
+		--text="Enter the desired TDP value." \
+		--separator="," \
+		--add-entry="TDP value (in watts)" > ./extras/tdp.conf
 	if [ $? -eq 1 ]; then
 		continue
-    else
+	else
 		file1="/usr/share/steamos-manager/devices/jupiter.toml"
 		file2="/usr/share/steamos-manager/devices/steam-deck.toml"
+		file3=""
 		if [ -f "$file1" ]; then
+			file3="$file1"
+		elif [ -f "$file2" ]; then
+			file3="$file2"
+		fi
+		if [ -f "$file3" ]; then
 			CONFIG_FILE="./extras/tdp.conf"
 			if [ ! -f "$CONFIG_FILE" ]; then
-    			zenity --error --title "Overclock Manager" --text "File '$CONFIG_FILE' not found."
-    			exit 1
+				zenity --error --title "Overclock Manager" --text "File '$CONFIG_FILE' not found."
+				exit 1
 			fi
 			value=$(cat "$CONFIG_FILE")
 			if ! [[ "$value" =~ ^[0-9]+$ ]] || [ "$value" -lt 2 ] || [ "$value" -gt 50 ]; then
-    			zenity --error --title "Overclock Manager" --text ""$value" is incorrect. \
+				zenity --error --title "Overclock Manager" --text ""$value" is incorrect. \
 				\nIt should be between 2 and 50!" --width 400 --height 75
-    			exit 1
+				exit 1
 			fi
 			echo -e "$password" | sudo -S sed -i.bak '
 			/\[tdp_limit\.range\]/ {
-    			n
-    			n
-    			s/max = [0-9]\+/max = '"$value"'/
+				n
+				n
+				s/max = [0-9]\+/max = '"$value"'/
 			}
-			' "$file1"
+			' "$file3"
 			if [ $? -eq 0 ]; then
-    			zenity --info --title "Overclock Manager" --text "Successfully set "$value"W TDP." --width 350 --height 75
-    			rm -f ./extras/tdp.conf
+				zenity --info --title "Overclock Manager" --text "Successfully set "$value"W TDP." --width 350 --height 75
+				rm -f ./extras/tdp.conf
 			else
-    			zenity --error --title "Overclock Manager" --text "Error when trying to set TDP!" \
-						--width 350 --height 75
-    			exit 1
-			fi
-		elif [ -f "$file2" ]; then
-			CONFIG_FILE="./extras/tdp.conf"
-			if [ ! -f "$CONFIG_FILE" ]; then
-    			zenity --error --title "Overclock Manager" --text "File '$CONFIG_FILE' not found."
-    			exit 1
-			fi
-			value=$(cat "$CONFIG_FILE")
-			if ! [[ "$value" =~ ^[0-9]+$ ]] || [ "$value" -lt 2 ] || [ "$value" -gt 50 ]; then
-    			zenity --error --title "Overclock Manager" --text ""$value" is incorrect. \
-				\nIt should be between 2 and 50!" --width 400 --height 75
-    			exit 1
-			fi
-			echo -e "$password" | sudo -S sed -i.bak '
-			/\[tdp_limit]/ {
-    			n
-    			n
-    			s/max = [0-9]\+/max = '"$value"'/
-			}
-			' "$file2"
-			if [ $? -eq 0 ]; then
-    			zenity --info --title "Overclock Manager" --text "Successfully set "$value"W TDP." --width 350 --height 75
-    			rm -f ./extras/tdp.conf
-			else
-    			zenity --error --title "Overclock Manager" --text "Error when trying to set TDP!" \
-						--width 350 --height 75
-    			exit 1
+				zenity --error --title "Overclock Manager" --text "Error when trying to set TDP!" \
+					--width 350 --height 75
+				exit 1
 			fi
 		else
-		zenity --error --title "Overclock Manager" --text \
+			zenity --error --title "Overclock Manager" --text \
 			""$file1" was not found.\nThe system may be corrupted." --width 400 --height 75
 		fi
-    fi
+	fi
 
 elif [ "$Choice" == "GPU Clock" ]; then
 	clear
