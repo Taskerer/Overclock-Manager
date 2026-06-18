@@ -213,18 +213,20 @@ elif [ "$Choice" == "Download BIOS" ]; then
 	declare -a files_to_download
 	if [ "$MODEL" = "Jupiter" ]; then
 		files_to_download=(
-			"https://gitlab.com/evlaV/jupiter-hw-support/-/raw/0660b2a5a9df3bd97751fe79c55859e3b77aec7d/usr/share/jupiter_bios/F7A0110_sign.fd"
-			"https://gitlab.com/evlaV/jupiter-hw-support/-/raw/38f7bdc2676421ee11104926609b4cc7a4dbc6a3/usr/share/jupiter_bios/F7A0116_sign.fd"
-			"https://gitlab.com/evlaV/jupiter-hw-support/-/raw/eb91bebf4c2e5229db071720250d80286368e4e2/usr/share/jupiter_bios/F7A0131_sign.fd"
-			"https://gitlab.com/evlaV/jupiter-hw-support/-/raw/5c14655a762870754f9d8574682b6727cb640904/usr/share/jupiter_bios/F7A0133_sign.fd"
+			"https://raw.githubusercontent.com/evlaV/jupiter-hw-support/0660b2a5a9df3bd97751fe79c55859e3b77aec7d/usr/share/jupiter_bios/F7A0110_sign.fd"
+			"https://raw.githubusercontent.com/evlaV/jupiter-hw-support/38f7bdc2676421ee11104926609b4cc7a4dbc6a3/usr/share/jupiter_bios/F7A0116_sign.fd"
+			"https://raw.githubusercontent.com/evlaV/jupiter-hw-support/eb91bebf4c2e5229db071720250d80286368e4e2/usr/share/jupiter_bios/F7A0131_sign.fd"
+			"https://raw.githubusercontent.com/evlaV/jupiter-hw-support/5c14655a762870754f9d8574682b6727cb640904/usr/share/jupiter_bios/F7A0133_sign.fd"
 		)
 		device_name="Steam Deck LCD"
 	elif [ "$MODEL" = "Galileo" ]; then
 		files_to_download=(
-			"https://gitlab.com/evlaV/jupiter-hw-support/-/raw/6101a30a621a2119e8c5213e872b268973659964/usr/share/jupiter_bios/F7G0112_sign.fd"
-			"https://gitlab.com/evlaV/jupiter-hw-support/-/raw/eb91bebf4c2e5229db071720250d80286368e4e2/usr/share/jupiter_bios/F7G0110_sign.fd"
-			"https://gitlab.com/evlaV/jupiter-hw-support/-/raw/7ffc22a4dc083c005e26676d276bdbd90dd1de5e/usr/share/jupiter_bios/F7G0109_sign.fd"
-			"https://gitlab.com/evlaV/jupiter-hw-support/-/raw/a43e38819ba20f363bdb5bedcf3f15b75bf79323/usr/share/jupiter_bios/F7G0107_sign.fd"
+		    "https://raw.githubusercontent.com/evlaV/jupiter-hw-support/c3a5508bb48688682c9defbb42c2d7167ff74213/usr/share/jupiter_bios/F7G0114_sign.fd"
+			"https://raw.githubusercontent.com/evlaV/jupiter-hw-support/15e3cffce87b05b20375bb15bd9f28e6aa4b1b5e/usr/share/jupiter_bios/F7G0113_sign.fd"
+			"https://raw.githubusercontent.com/evlaV/jupiter-hw-support/6101a30a621a2119e8c5213e872b268973659964/usr/share/jupiter_bios/F7G0112_sign.fd"
+			"https://raw.githubusercontent.com/evlaV/jupiter-hw-support/eb91bebf4c2e5229db071720250d80286368e4e2/usr/share/jupiter_bios/F7G0110_sign.fd"
+			"https://raw.githubusercontent.com/evlaV/jupiter-hw-support/7ffc22a4dc083c005e26676d276bdbd90dd1de5e/usr/share/jupiter_bios/F7G0109_sign.fd"
+			"https://raw.githubusercontent.com/evlaV/jupiter-hw-support/a43e38819ba20f363bdb5bedcf3f15b75bf79323/usr/share/jupiter_bios/F7G0107_sign.fd"
 		)
 		device_name="Steam Deck OLED"
 	fi
@@ -258,6 +260,8 @@ elif [ "$Choice" == "Download BIOS" ]; then
 		["F7G0109_sign.fd"]="b2b73afd31e7685132e2c634863e3e33"
 		["F7G0110_sign.fd"]="336138b19d27526acd4642ffe53aee34"
 		["F7G0112_sign.fd"]="44f0243f662c6d279eb55cdb89089f7f"
+		["F7G0113_sign.fd"]="254d9a5b0047d8806968903d185d7816"
+		["F7G0114_sign.fd"]="97f4a2627d8332f55dabf3008d75be08"
 	)
 	report_text="Download and Verification Report:\n\n"
 	error_found=false
